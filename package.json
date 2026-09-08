@@ -1,0 +1,9 @@
+{
+  "name": "resto-commande",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend",
+    "shared"
+  ]
+}
