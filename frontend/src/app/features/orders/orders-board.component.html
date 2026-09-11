@@ -55,9 +55,18 @@
             <div class="menu-rows">
               @for (item of menu(); track item.id) {
                 <div class="menu-row">
-                  <div>
-                    <div class="item-name">{{ item.name }}</div>
-                    <div class="item-price">{{ item.price | number: '1.2-2' }} €</div>
+                  <div class="menu-row-info">
+                    @if (item.imageUrl) {
+                      <img class="item-photo" [src]="item.imageUrl" [alt]="item.name" />
+                    } @else {
+                      <div class="item-photo item-photo-placeholder" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v8a2 2 0 0 0 2 2v10"/><path d="M6 2v6M10 2v6"/><path d="M17 2c-1.7 0-3 1.9-3 4.5S15.3 11 17 11v11"/></svg>
+                      </div>
+                    }
+                    <div>
+                      <div class="item-name">{{ item.name }}</div>
+                      <div class="item-price">{{ item.price | number: '1.2-2' }} €</div>
+                    </div>
                   </div>
                   <div class="stepper">
                     <button type="button" (click)="decQty(item.id)">−</button>
@@ -80,23 +89,31 @@
           </section>
 
           <section>
-            <div class="card-title">Mes commandes en cours</div>
-            <div class="order-list">
+            <div class="section-head">
+              <div class="card-title">Mes commandes en cours</div>
+              @if (myOrders().length) {
+                <div class="swipe-hint">
+                  Faites glisser
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </div>
+              }
+            </div>
+            <div class="order-carousel">
               @for (order of myOrders(); track order.id) {
-                <div class="order-row">
-                  <div class="order-info">
+                <div class="order-card">
+                  <div class="order-card-head">
                     <div class="table-chip">T{{ order.tableNumber }}</div>
-                    <div>
-                      <div class="summary">
-                        @for (it of order.items; track $index) {
-                          {{ it.quantity }}× {{ menuItemName(it.menuItemId) }}@if (it.constraints.length) { ({{ it.constraints.join(', ') }}) }@if (!$last) {, }
-                        }
-                      </div>
+                    <div class="status-badge" [style.color]="statusMeta[order.status].color" [style.background]="statusMeta[order.status].bg">
+                      {{ statusMeta[order.status].label }}
                     </div>
                   </div>
-                  <div class="status-badge" [style.color]="statusMeta[order.status].color" [style.background]="statusMeta[order.status].bg">
-                    {{ statusMeta[order.status].label }}
-                  </div>
+                  <app-order-photo-carousel [items]="order.items" [menu]="menu()" />
+                  @if (orderConstraints(order).length) {
+                    <div class="constraint-badge">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+                      {{ orderConstraints(order).join(' · ') }}
+                    </div>
+                  }
                 </div>
               } @empty {
                 <p class="empty">Aucune commande pour l'instant.</p>
@@ -107,70 +124,82 @@
       }
 
       @case ('cook') {
-        <div class="kanban">
-          <div class="kanban-col">
+        <div class="catalog">
+          <section class="catalog-row">
             <div class="kanban-title pending">
               <span class="dot"></span>À préparer
             </div>
-            @for (order of todo(); track order.id) {
-              <div class="kanban-card pending">
-                <div class="kanban-card-head">
-                  <span>Table {{ order.tableNumber }}</span>
-                </div>
-                <div class="kanban-summary">
-                  @for (it of order.items; track $index) {
-                    {{ it.quantity }}× {{ menuItemName(it.menuItemId) }}@if (!$last) {, }
+            <div class="catalog-scroll">
+              @for (order of todo(); track order.id) {
+                <div class="kanban-card pending">
+                  <div class="kanban-card-head">
+                    <span>Table {{ order.tableNumber }}</span>
+                  </div>
+                  <app-order-photo-carousel class="kanban-summary" [items]="order.items" [menu]="menu()" />
+                  @if (orderConstraints(order).length) {
+                    <div class="constraint-badge small">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+                      {{ orderConstraints(order).join(' · ') }}
+                    </div>
                   }
+                  <button type="button" class="advance prep" (click)="advance(order, 'in_preparation')">
+                    Commencer →
+                  </button>
                 </div>
-                <button type="button" class="advance prep" (click)="advance(order, 'in_preparation')">
-                  Commencer →
-                </button>
-              </div>
-            }
-          </div>
+              } @empty {
+                <p class="empty">Aucune commande.</p>
+              }
+            </div>
+          </section>
 
-          <div class="kanban-col">
+          <section class="catalog-row">
             <div class="kanban-title prep">
               <span class="dot"></span>En préparation
             </div>
-            @for (order of inProgress(); track order.id) {
-              <div class="kanban-card prep">
-                <div class="kanban-card-head">
-                  <span>Table {{ order.tableNumber }}</span>
-                </div>
-                <div class="kanban-summary">
-                  @for (it of order.items; track $index) {
-                    {{ it.quantity }}× {{ menuItemName(it.menuItemId) }}@if (!$last) {, }
+            <div class="catalog-scroll">
+              @for (order of inProgress(); track order.id) {
+                <div class="kanban-card prep">
+                  <div class="kanban-card-head">
+                    <span>Table {{ order.tableNumber }}</span>
+                  </div>
+                  <app-order-photo-carousel class="kanban-summary" [items]="order.items" [menu]="menu()" />
+                  @if (orderConstraints(order).length) {
+                    <div class="constraint-badge small">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+                      {{ orderConstraints(order).join(' · ') }}
+                    </div>
                   }
+                  <button type="button" class="advance served" (click)="advance(order, 'served')">
+                    Marquer servie →
+                  </button>
                 </div>
-                <button type="button" class="advance served" (click)="advance(order, 'served')">
-                  Marquer servie →
-                </button>
-              </div>
-            }
-          </div>
+              } @empty {
+                <p class="empty">Aucune commande.</p>
+              }
+            </div>
+          </section>
 
-          <div class="kanban-col">
+          <section class="catalog-row">
             <div class="kanban-title served">
               <span class="dot"></span>Servie
             </div>
-            @for (order of ready(); track order.id) {
-              <div class="kanban-card served">
-                <div class="kanban-card-head">
-                  <span>Table {{ order.tableNumber }}</span>
+            <div class="catalog-scroll">
+              @for (order of ready(); track order.id) {
+                <div class="kanban-card served">
+                  <div class="kanban-card-head">
+                    <span>Table {{ order.tableNumber }}</span>
+                  </div>
+                  <app-order-photo-carousel class="kanban-summary" [items]="order.items" [menu]="menu()" />
+                  <div class="done">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                    Commande terminée
+                  </div>
                 </div>
-                <div class="kanban-summary">
-                  @for (it of order.items; track $index) {
-                    {{ it.quantity }}× {{ menuItemName(it.menuItemId) }}@if (!$last) {, }
-                  }
-                </div>
-                <div class="done">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                  Commande terminée
-                </div>
-              </div>
-            }
-          </div>
+              } @empty {
+                <p class="empty">Aucune commande.</p>
+              }
+            </div>
+          </section>
         </div>
       }
 
@@ -191,31 +220,39 @@
             </div>
           </div>
 
-          <div class="table-card">
-            <div class="table-head">
-              <div>Table</div>
-              <div>Plats</div>
-              <div>Statut</div>
-              <div>Heure</div>
-              <div></div>
-            </div>
-            @for (order of allOrders(); track order.id) {
-              <div class="table-row">
-                <div class="cell-strong">T{{ order.tableNumber }}</div>
-                <div class="cell-summary">
-                  @for (it of order.items; track $index) {
-                    {{ it.quantity }}× {{ menuItemName(it.menuItemId) }}@if (!$last) {, }
-                  }
-                </div>
-                <div>
-                  <span class="status-badge" [style.color]="statusMeta[order.status].color" [style.background]="statusMeta[order.status].bg">
-                    {{ statusMeta[order.status].label }}
+          <div class="table-boards">
+            @for (group of tableGroups(); track group.tableNumber) {
+              <div class="table-board">
+                <div class="table-board-head">
+                  <div class="cell-strong">T{{ group.tableNumber }}</div>
+                  <span class="cell-muted">
+                    {{ group.orders.length }} commande{{ group.orders.length > 1 ? 's' : '' }}
                   </span>
                 </div>
-                <div class="cell-muted">{{ order.createdAt | date: 'HH:mm' }}</div>
-                <div>
-                  @if (order.status !== 'served' && order.status !== 'cancelled') {
-                    <button type="button" class="cancel" (click)="cancel(order)">Annuler</button>
+
+                <div class="table-board-orders">
+                  @for (order of group.orders; track order.id) {
+                    <div class="board-order">
+                      <div class="board-order-head">
+                        <span class="status-badge" [style.color]="statusMeta[order.status].color" [style.background]="statusMeta[order.status].bg">
+                          {{ statusMeta[order.status].label }}
+                        </span>
+                        <span class="cell-muted">{{ order.createdAt | date: 'HH:mm' }}</span>
+                      </div>
+
+                      <app-order-photo-carousel [items]="order.items" [menu]="menu()" size="row" />
+
+                      @if (orderConstraints(order).length) {
+                        <div class="constraint-badge small inline">
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+                          {{ orderConstraints(order).join(' · ') }}
+                        </div>
+                      }
+
+                      @if (order.status !== 'served' && order.status !== 'cancelled') {
+                        <button type="button" class="cancel" (click)="cancel(order)">Annuler</button>
+                      }
+                    </div>
                   }
                 </div>
               </div>

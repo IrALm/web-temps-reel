@@ -1,0 +1,18 @@
+# Fusionné automatiquement par `docker compose up` en local (convention
+# standard de Docker Compose) — rouvre les ports fermés dans
+# docker-compose.yml pour le confort du développement (migrations Prisma,
+# accès direct à Postgres depuis l'hôte, test du backend hors reverse
+# proxy...). Un déploiement en production n'utilise que docker-compose.yml
+# (ce fichier ne doit pas y être copié) et reste donc fermé.
+services:
+  postgres:
+    ports:
+      - "5433:5432"
+
+  backend:
+    ports:
+      - "3000:3000"
+
+  frontend:
+    ports:
+      - "4200:80"

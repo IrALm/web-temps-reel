@@ -182,3 +182,44 @@
   justify-content: center;
   flex: none;
 }
+
+@media (max-width: 720px) {
+  .topbar {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+
+  /* La barre latérale des canaux devient une rangée d'onglets horizontale
+     au-dessus du fil, plutôt qu'une colonne qui écraserait le chat. */
+  .body {
+    flex-direction: column;
+  }
+  .channels {
+    width: auto;
+    flex-direction: row;
+    align-items: center;
+    overflow-x: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 10px 12px;
+    gap: 6px;
+  }
+  .channels-title {
+    display: none;
+  }
+  .channel {
+    flex: none;
+    white-space: nowrap;
+  }
+
+  .thread-title,
+  .messages,
+  .composer {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .bubble {
+    max-width: 78vw;
+  }
+}

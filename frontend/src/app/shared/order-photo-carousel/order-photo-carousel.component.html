@@ -1,0 +1,27 @@
+<div class="opc" [class.row]="size() === 'row'">
+  <div class="frame">
+    @if (currentImage(); as src) {
+      <img [src]="src" [alt]="currentName()" />
+    } @else {
+      <div class="ph" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v8a2 2 0 0 0 2 2v10"/><path d="M6 2v6M10 2v6"/><path d="M17 2c-1.7 0-3 1.9-3 4.5S15.3 11 17 11v11"/></svg>
+      </div>
+    }
+
+    @if (items().length > 1) {
+      <button type="button" class="nav prev" (click)="prev()" aria-label="Plat précédent">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <button type="button" class="nav next" (click)="next()" aria-label="Plat suivant">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    }
+  </div>
+
+  <div class="caption">
+    <span class="name"><span class="qty">{{ currentQuantity() }}×</span> {{ currentName() }}</span>
+    @if (items().length > 1) {
+      <span class="pos">{{ position() + 1 }}/{{ items().length }}</span>
+    }
+  </div>
+</div>

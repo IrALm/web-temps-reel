@@ -125,3 +125,18 @@ button[type='submit']:disabled {
   padding: 1px 6px;
   border-radius: 5px;
 }
+
+@media (max-width: 480px) {
+  .page {
+    flex-direction: column;
+    padding: 16px;
+  }
+  .brand {
+    position: static;
+    margin-bottom: 20px;
+    justify-content: center;
+  }
+  .card {
+    padding: 28px 22px;
+  }
+}

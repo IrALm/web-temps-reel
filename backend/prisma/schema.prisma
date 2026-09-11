@@ -44,10 +44,11 @@ model User {
 }
 
 model MenuItem {
-  id       String @id @default(cuid())
+  id       String  @id @default(cuid())
   name     String
   price    Float
   category String
+  imageUrl String?
 
   orderItems OrderItem[]
 }

@@ -11,6 +11,8 @@ export const menuItemSchema = z.object({
   name: z.string().min(1),
   price: z.number().nonnegative(),
   category: z.string().min(1),
+  /** URL relative (fichier local servi par le frontend) ou absolue (API externe). */
+  imageUrl: z.string().min(1).optional(),
 });
 
 export const orderItemSchema = z.object({

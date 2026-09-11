@@ -77,9 +77,14 @@
 .subheader {
   flex: none;
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
-  justify-content: space-between;
+  gap: 8px 16px;
   padding: 20px 32px 4px;
+}
+.subheader h1 {
+  flex: 1;
+  min-width: 0;
 }
 
 .subheader h1 {
@@ -174,6 +179,28 @@
   background: var(--bg);
 }
 
+.menu-row-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.item-photo {
+  width: 44px;
+  height: 44px;
+  border-radius: 9px;
+  object-fit: cover;
+  flex: none;
+  background: var(--surface-alt);
+}
+.item-photo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+}
+
 .item-name {
   font-size: 14px;
   font-weight: 600;
@@ -229,46 +256,76 @@ button.primary:hover {
   background: var(--accent-hover);
 }
 
-.order-list,
 .table-card {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.order-row {
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.section-head .card-title {
+  margin-bottom: 0;
+}
+.swipe-hint {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Carrousel horizontal ("swipe") des commandes du serveur */
+.order-carousel {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding: 4px 4px 14px;
+  scroll-snap-type: x proximity;
+}
+.order-carousel::-webkit-scrollbar { height: 8px; }
+.order-carousel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 8px; }
+
+.order-card {
+  flex: 0 0 auto;
+  width: 240px;
+  scroll-snap-align: start;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.order-card-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 14px 18px;
-  border-radius: 12px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-}
-
-.order-info {
-  display: flex;
-  align-items: center;
-  gap: 16px;
 }
 
 .table-chip {
-  width: 44px;
-  height: 44px;
+  width: 38px;
+  height: 38px;
   border-radius: 10px;
   background: var(--surface-alt);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 700;
   flex: none;
 }
 
 .summary {
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 600;
+  line-height: 1.45;
 }
 
 .status-badge {
@@ -279,25 +336,54 @@ button.primary:hover {
   white-space: nowrap;
 }
 
+/* Badge de spécificité ("sans oignon"...) — distinct du résumé des plats,
+   visible sur les 3 vues (serveur, cuisine, responsable). */
+.constraint-badge {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 7px 9px;
+  border-radius: 8px;
+  background: var(--pending-bg);
+  color: var(--pending);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.constraint-badge svg { flex: none; margin-top: 1px; }
+.constraint-badge.small {
+  font-size: 10.5px;
+  padding: 6px 8px;
+  margin-bottom: 10px;
+}
+.constraint-badge.inline {
+  margin-top: 4px;
+  display: inline-flex;
+}
+
 .empty {
   font-size: 13px;
   color: var(--text-muted);
 }
 
-/* Kanban (cuisine) */
+/* Cuisine — rangées horizontales façon "catalogue" (une rangée par statut) */
 
-.kanban {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
-  max-width: 1180px;
-}
-
-.kanban-col {
+.catalog {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 28px;
+  max-width: 1380px;
 }
+
+.catalog-scroll {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 4px 4px 10px;
+  scroll-snap-type: x proximity;
+}
+.catalog-scroll::-webkit-scrollbar { height: 8px; }
+.catalog-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 8px; }
 
 .kanban-title {
   display: flex;
@@ -315,8 +401,15 @@ button.primary:hover {
   border-radius: 999px;
   background: currentColor;
 }
+.catalog-row .kanban-title {
+  margin-bottom: 12px;
+  font-size: 14px;
+}
 
 .kanban-card {
+  flex: 0 0 auto;
+  width: 230px;
+  scroll-snap-align: start;
   background: var(--surface);
   border: 1px solid var(--border);
   border-left: 3px solid transparent;
@@ -393,39 +486,67 @@ button.advance.served {
 .kpi-value.served { color: var(--served); }
 .kpi-value.cancelled { color: var(--cancelled); }
 
-.table-card {
+/* Vue Responsable — une carte par table, alignées côte à côte plutôt
+   qu'empilées en lignes : on voit plusieurs tables d'un coup d'œil, chacune
+   avec ses commandes groupées à l'intérieur. */
+.table-boards {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 4px 4px 14px;
+  scroll-snap-type: x proximity;
+}
+.table-boards::-webkit-scrollbar { height: 8px; }
+.table-boards::-webkit-scrollbar-thumb { background: var(--border); border-radius: 8px; }
+
+.table-board {
+  flex: 0 0 auto;
+  width: 290px;
+  scroll-snap-align: start;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 14px;
   overflow: hidden;
-  gap: 0;
 }
 
-.table-head,
-.table-row {
-  display: grid;
-  grid-template-columns: 70px 1fr 130px 70px 110px;
-  gap: 10px;
+.table-board-head {
+  display: flex;
   align-items: center;
-  padding: 13px 18px;
-  font-size: 12.5px;
-}
-
-.table-head {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
+  justify-content: space-between;
+  padding: 14px 18px;
   background: var(--surface-alt);
   border-bottom: 1px solid var(--border);
+  font-size: 12.5px;
+}
+.table-board-head .cell-strong {
+  font-size: 15px;
 }
 
-.table-row {
-  border-bottom: 1px solid var(--border);
+.table-board-orders {
+  display: flex;
+  flex-direction: column;
 }
-.table-row:last-child {
+
+.board-order {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12.5px;
+}
+.board-order:last-child {
   border-bottom: none;
+}
+
+.board-order-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.board-order button.cancel {
+  align-self: flex-end;
 }
 
 .cell-strong {
@@ -445,18 +566,46 @@ button.cancel {
   background: var(--cancelled-bg);
 }
 
-@media (max-width: 900px) {
-  .kanban {
+@media (max-width: 860px) {
+  .kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .topbar {
+    padding: 12px 16px;
+  }
+  .subheader {
+    padding: 16px 16px 4px;
+  }
+  .content {
+    padding: 12px 16px 32px;
+  }
+  .card {
+    padding: 18px 16px;
+  }
+  .table-field {
+    width: 100%;
+    max-width: 220px;
+  }
+
+  /* Formulaire de commande : la grille 3 colonnes (infos / stepper /
+     contrainte) ne peut pas tenir sur un téléphone — on empile. */
+  .menu-row {
     grid-template-columns: 1fr;
   }
-  .table-head,
-  .table-row {
-    grid-template-columns: 50px 1fr 100px;
+  .stepper {
+    justify-self: start;
   }
-  .table-head > div:nth-child(4),
-  .table-head > div:nth-child(5),
-  .table-row > div:nth-child(4),
-  .table-row > div:nth-child(5) {
-    display: none;
+
+  .kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .order-card,
+  .kanban-card,
+  .table-board {
+    width: 210px;
   }
 }

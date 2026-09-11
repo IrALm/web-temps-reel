@@ -1,0 +1,109 @@
+.opc {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface-alt);
+  flex: none;
+}
+
+.frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ph {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+}
+
+.nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 999px;
+  background: oklch(0.99 0.005 70 / 0.85);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px oklch(0.3 0.03 40 / 0.2);
+}
+.nav.prev { left: 6px; }
+.nav.next { right: 6px; }
+
+.caption {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  min-width: 0;
+}
+.caption .name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.caption .qty {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.caption .pos {
+  flex: none;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+/* Variante pour la ligne du tableau responsable : vignette carrée à côté du
+   texte, agrandie pour rester lisible dans la colonne large "Plats". */
+.opc.row {
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+}
+.opc.row .frame {
+  width: 76px;
+  height: 76px;
+  aspect-ratio: unset;
+}
+.opc.row .nav {
+  width: 22px;
+  height: 22px;
+}
+.opc.row .nav svg {
+  width: 12px;
+  height: 12px;
+}
+.opc.row .nav.prev { left: 4px; }
+.opc.row .nav.next { right: 4px; }
+.opc.row .caption {
+  flex: 1;
+  min-width: 0;
+  font-size: 13.5px;
+}
+.opc.row .caption .name {
+  max-width: 100%;
+}
+.opc.row .caption .pos {
+  font-size: 12px;
+}

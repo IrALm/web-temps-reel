@@ -9,6 +9,7 @@ import {type OrderWithId, OrdersApiService} from '../../core/services/orders-api
 import {RealtimeOrdersService} from '../../core/services/realtime-orders.service';
 import {ModeSelectorComponent} from '../../shared/mode-selector/mode-selector.component';
 import {ORDER_STATUS_META} from '../../shared/order-status';
+import {OrderPhotoCarouselComponent} from '../../shared/order-photo-carousel/order-photo-carousel.component';
 import {PerformancePanelComponent} from '../../shared/performance-panel/performance-panel.component';
 
 @Component({
@@ -19,6 +20,7 @@ import {PerformancePanelComponent} from '../../shared/performance-panel/performa
     DatePipe,
     DecimalPipe,
     ModeSelectorComponent,
+    OrderPhotoCarouselComponent,
     PerformancePanelComponent,
   ],
   templateUrl: './orders-board.component.html',
@@ -32,7 +34,9 @@ export class OrdersBoardComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
 
   protected readonly statusMeta = ORDER_STATUS_META;
-  protected readonly perfOpen = signal(true);
+  protected readonly perfOpen = signal(
+    typeof window === 'undefined' || window.innerWidth > 860,
+  );
   protected readonly menu = signal<MenuItemWithId[]>([]);
   protected readonly actionError = signal<string | null>(null);
 
@@ -68,9 +72,26 @@ export class OrdersBoardComponent implements OnInit, OnDestroy {
     this.realtime.orders().filter((o) => o.status === 'served'),
   );
 
-  protected readonly allOrders = computed(() =>
-    [...this.realtime.orders()].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
-  );
+  /** Vue Responsable : une carte par table (plutôt qu'une ligne par commande)
+   * pour voir plusieurs tables côte à côte d'un coup d'œil ; les commandes
+   * d'une même table restent groupées et empilées à l'intérieur de sa carte. */
+  protected readonly tableGroups = computed(() => {
+    const groups = new Map<number, OrderWithId[]>();
+    for (const order of this.realtime.orders()) {
+      const list = groups.get(order.tableNumber);
+      if (list) {
+        list.push(order);
+      } else {
+        groups.set(order.tableNumber, [order]);
+      }
+    }
+    return [...groups.entries()]
+      .map(([tableNumber, orders]) => ({
+        tableNumber,
+        orders: orders.sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+      }))
+      .sort((a, b) => a.tableNumber - b.tableNumber);
+  });
   protected readonly countActive = computed(
     () =>
       this.realtime.orders().filter((o) => o.status === 'pending' || o.status === 'in_preparation')
@@ -101,6 +122,16 @@ export class OrdersBoardComponent implements OnInit, OnDestroy {
 
   protected menuItemName(id: string): string {
     return this.menu().find((m) => m.id === id)?.name ?? id;
+  }
+
+  /** Contraintes ("sans oignon"...) de tous les plats d'une commande, à plat
+   * — préfixées par le nom du plat seulement s'il y en a plusieurs, pour
+   * rester lisible dans un badge dédié plutôt que noyées dans le résumé. */
+  protected orderConstraints(order: OrderWithId): string[] {
+    const multipleItems = order.items.length > 1;
+    return order.items.flatMap((it) =>
+      it.constraints.map((c) => (multipleItems ? `${this.menuItemName(it.menuItemId)} : ${c}` : c)),
+    );
   }
 
   protected qty(id: string): number {
