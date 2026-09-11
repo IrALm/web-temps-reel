@@ -4,10 +4,78 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  manager
+  waiter
+  cook
+}
+
+enum OrderStatus {
+  pending
+  in_preparation
+  served
+  cancelled
+}
+
+enum EventType {
+  order_created
+  order_status_updated
+  order_cancelled
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  password  String
+  role      Role
+  createdAt DateTime @default(now())
+
+  orders Order[]
+}
+
+model MenuItem {
+  id       String @id @default(cuid())
+  name     String
+  price    Float
+  category String
+
+  orderItems OrderItem[]
+}
+
+model Order {
+  id          String      @id @default(cuid())
+  tableNumber Int
+  waiterId    String
+  status      OrderStatus
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  waiter User        @relation(fields: [waiterId], references: [id], onDelete: Restrict)
+  items  OrderItem[]
+}
+
+model OrderItem {
+  id          String   @id @default(cuid())
+  orderId     String
+  menuItemId  String
+  quantity    Int
+  constraints String[]
+
+  order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Restrict)
+}
+
+model Event {
+  id        Int       @id @default(autoincrement())
+  type      EventType
+  payload   Json
+  createdAt DateTime  @default(now())
 }
