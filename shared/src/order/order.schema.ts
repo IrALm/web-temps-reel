@@ -21,6 +21,7 @@ export const orderItemSchema = z.object({
 
 export const orderSchema = z.object({
   tableNumber: z.number().int().min(1),
+  waiterId: z.string().min(1),
   items: z.array(orderItemSchema).min(1),
   status: orderStatusSchema,
 });

@@ -38,7 +38,8 @@ model User {
   role      Role
   createdAt DateTime @default(now())
 
-  orders Order[]
+  orders       Order[]
+  chatMessages ChatMessage[]
 }
 
 model MenuItem {
@@ -71,6 +72,16 @@ model OrderItem {
 
   order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   menuItem MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Restrict)
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  channelId String
+  authorId  String
+  content   String
+  createdAt DateTime @default(now())
+
+  author User @relation(fields: [authorId], references: [id], onDelete: Restrict)
 }
 
 model Event {
