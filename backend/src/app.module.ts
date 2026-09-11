@@ -1,8 +1,13 @@
 import { Module } from '@nestjs/common';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { createObserveModule } from '@nestjs/observe';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { PrismaModule } from './prisma/prisma.module.js';
+import { EventLogModule } from './events/event-log.module.js';
+import { OrderModule } from './order/order.module.js';
+import { ChatModule } from './chat/chat.module.js';
+import { AuthModule } from './auth/auth.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -15,7 +20,12 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
       appSecret: 'YOUR_APP_SECRET',
       serviceId: 'backend',
     }),
+    EventEmitterModule.forRoot(),
     PrismaModule,
+    EventLogModule,
+    OrderModule,
+    ChatModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -29,6 +29,7 @@ enum EventType {
   order_created
   order_status_updated
   order_cancelled
+  chat_message_created
 }
 
 model User {
