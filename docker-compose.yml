@@ -8,8 +8,8 @@ services:
       POSTGRES_DB: restaurant
       POSTGRES_USER: restaurant
       POSTGRES_PASSWORD: restaurant
-    ports:
-      - "5433:5432"
+    # Pas de "ports" : la base ne doit être joignable que depuis les autres
+    # conteneurs du réseau Docker, jamais depuis l'hôte.
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -19,8 +19,8 @@ services:
       dockerfile: backend/Dockerfile
     container_name: restaurant-backend
     restart: unless-stopped
-    ports:
-      - "3000:3000"
+    # Pas de "ports" : seul le reverse proxy (service "proxy") doit
+    # atteindre le backend, via le réseau Docker interne (backend:3000).
     environment:
       DATABASE_URL: postgresql://restaurant:restaurant@postgres:5432/restaurant
     depends_on:
@@ -32,9 +32,21 @@ services:
       dockerfile: frontend/Dockerfile
     container_name: restaurant-frontend
     restart: unless-stopped
-    ports:
-      - "4200:80"
+    # Pas de "ports" non plus : le frontend n'est servi qu'à travers le
+    # reverse proxy (frontend:80 en interne).
     depends_on:
+      - backend
+
+  proxy:
+    build:
+      context: .
+      dockerfile: proxy/Dockerfile
+    container_name: restaurant-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
       - backend
 
 volumes:

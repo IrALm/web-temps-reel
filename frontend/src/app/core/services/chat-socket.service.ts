@@ -2,7 +2,7 @@ import {isPlatformBrowser} from '@angular/common';
 import {Injectable, PLATFORM_ID, inject, signal} from '@angular/core';
 import {io, type Socket} from 'socket.io-client';
 import {chatMessageCreatedEventSchema} from '@resto/shared';
-import {SOCKET_IO_URL} from '../config';
+import {socketIoUrl} from '../config';
 import {AuthService} from './auth.service';
 import {ChatApiService, type ChatMessageWithId} from './chat-api.service';
 import {NetworkMonitorService} from './network-monitor.service';
@@ -35,7 +35,7 @@ export class ChatSocketService {
       return;
     }
 
-    const socket = io(SOCKET_IO_URL, {auth: {userId}});
+    const socket = io(socketIoUrl(), {auth: {userId}});
     this.socket = socket;
 
     socket.on('connect', () => {

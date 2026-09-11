@@ -14,6 +14,7 @@
 2. [Acteurs et parcours utilisateurs](#2-acteurs-et-parcours-utilisateurs)
 3. [Exigences fonctionnelles et non fonctionnelles](#3-exigences-fonctionnelles-et-non-fonctionnelles)
 4. [Architecture retenue et sa justification](#4-architecture-retenue-et-sa-justification)
+   - [4.1 Déploiement production — reverse proxy](#41-déploiement-production--reverse-proxy)
 5. [Cycle de vie d'une commande](#5-cycle-de-vie-dune-commande)
 6. [Les 5 mécanismes temps réel — détail, classes, diagrammes, performance](#6-les-5-mécanismes-temps-réel)
    - [6.1 Polling](#61-polling)
@@ -112,6 +113,29 @@ flowchart LR
 - Les **mutations** (créer une commande, changer son statut) passent toujours par REST, quel que soit le mode de réception choisi côté client. Seule la façon de RECEVOIR les mises à jour change. Ça simplifie radicalement le frontend : un seul `OrdersApiService` pour écrire, cinq stratégies interchangeables pour lire.
 - PostgreSQL + Prisma pour la persistance (contrainte du projet), avec la table `Event` comme journal d'événements séparé des tables métier (`Order`, `ChatMessage`) — la commande reste un objet métier propre, l'historique d'événements est une préoccupation à part qui sert uniquement au temps réel (rattrapage, replay).
 - Zod ([shared/](../shared/src)) comme contrat unique partagé entre backend et frontend : mêmes schémas validés des deux côtés, un seul endroit où faire évoluer la forme d'un événement.
+
+### 4.1 Déploiement production — reverse proxy
+
+En production ([docker-compose.yml](../docker-compose.yml)), seul un conteneur nginx dédié ([proxy/nginx.conf](../proxy/nginx.conf)) est exposé à l'extérieur (port 80) ; `frontend`, `backend` et `postgres` ne publient plus aucun port sur l'hôte, uniquement joignables entre eux via le réseau Docker interne.
+
+```mermaid
+flowchart LR
+    Internet(["Client (navigateur)"]) -->|"port 80"| Proxy["nginx (proxy)"]
+
+    subgraph Interne["Réseau Docker interne — aucun port publié sur l'hôte"]
+        Proxy -->|"/ (SPA)"| Frontend["frontend:80\n(nginx + fichiers Angular)"]
+        Proxy -->|"/api/*"| Backend["backend:3000\n(NestJS)"]
+        Proxy -->|"/ws/*"| Backend
+        Proxy -->|"/socket.io/*"| Backend
+        Backend --> DB[("postgres:5432")]
+    end
+```
+
+Tout transite par une seule origine (même hôte, même port), ce qui règle au passage le CORS et simplifie la configuration WebSocket. Deux conséquences concrètes côté code :
+- **Backend** : `app.setGlobalPrefix('api')` ([main.ts](../backend/src/main.ts)) — évite la collision entre la route Angular `/orders` et l'endpoint REST `GET /orders` sur la même origine.
+- **Frontend** : [config.ts](../frontend/src/app/core/config.ts) utilise des chemins relatifs (`/api`) plutôt qu'une URL absolue, et calcule les URL WebSocket/Socket.IO à partir de `window.location` au moment de la connexion (jamais à l'import du module, pour rester compatible SSR).
+
+Le flux SSE (`/api/orders/stream`) a sa propre `location` nginx avec `proxy_buffering off` et un `proxy_read_timeout` long — sans ça, nginx retiendrait les événements en tampon au lieu de les transmettre immédiatement, et couperait la connexion au bout du timeout par défaut (60 s).
 
 ## 5. Cycle de vie d'une commande
 
@@ -463,15 +487,19 @@ Tous les schémas sont définis une fois dans [shared/src/events](../shared/src/
 
 **Endpoints REST**
 
+Préfixées `/api` (`app.setGlobalPrefix('api')`, [main.ts](../backend/src/main.ts)) pour rester sur la même origine que les routes Angular derrière le reverse proxy en production (voir [§4.1](#41-déploiement-production--reverse-proxy)) sans collision — l'Angular Router a lui aussi une route `/orders`.
+
 | Méthode | Route | Rôle requis |
 |---|---|---|
-| `GET` | `/orders` | Public (lecture) |
-| `GET` | `/orders/updates?after=` | Public (long polling) |
-| `GET` | `/orders/stream` | Public (SSE) |
-| `POST` | `/orders` | `waiter` ou `manager` |
-| `PATCH` | `/orders/:id/status` | Selon la transition (voir §8) |
-| `POST` | `/auth/login` | Public |
-| `GET` | `/chat/:channelId/messages` | Public (historique) |
+| `GET` | `/api/orders` | Public (lecture) |
+| `GET` | `/api/orders/updates?after=` | Public (long polling) |
+| `GET` | `/api/orders/stream` | Public (SSE) |
+| `POST` | `/api/orders` | `waiter` ou `manager` |
+| `PATCH` | `/api/orders/:id/status` | Selon la transition (voir §8) |
+| `POST` | `/api/auth/login` | Public |
+| `GET` | `/api/chat/:channelId/messages` | Public (historique) |
+
+(`/ws/chat`, `/ws/orders` et `/socket.io/` ne passent pas par le routeur REST de Nest — non concernés par ce préfixe.)
 
 ## 10. Sécurité et fiabilité
 

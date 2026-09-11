@@ -5,7 +5,7 @@ import {
   orderCreatedEventSchema,
   orderStatusUpdatedEventSchema,
 } from '@resto/shared';
-import {API_BASE_URL, SOCKET_IO_URL, WS_ORDERS_URL} from '../config';
+import {API_BASE_URL, socketIoUrl, wsOrdersUrl} from '../config';
 import {AuthService} from './auth.service';
 import {NetworkMonitorService} from './network-monitor.service';
 import {OrdersApiService, type OrderWithId} from './orders-api.service';
@@ -208,7 +208,7 @@ export class RealtimeOrdersService {
   // --- WebSocket natif -----------------------------------------------
 
   private startWebSocket(signal: AbortSignal): void {
-    const ws = new WebSocket(`${WS_ORDERS_URL}?after=${this.cursor}`);
+    const ws = new WebSocket(`${wsOrdersUrl()}?after=${this.cursor}`);
 
     ws.onopen = () =>
       this.monitor.record({
@@ -249,7 +249,7 @@ export class RealtimeOrdersService {
   // --- Socket.IO -----------------------------------------------------
 
   private startSocketIo(signal: AbortSignal, userId: string): void {
-    const socket = io(SOCKET_IO_URL, {auth: {userId}});
+    const socket = io(socketIoUrl(), {auth: {userId}});
     this.socket = socket;
 
     socket.on('connect', () => {
