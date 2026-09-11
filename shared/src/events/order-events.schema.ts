@@ -16,7 +16,8 @@ export const orderStatusUpdatedEventSchema = z.object({
   orderId: z.string().min(1),
   previousStatus: orderStatusSchema,
   status: orderStatusSchema,
-  updatedAt: z.coerce.date(),
+  /** Horodatage de l'événement lui-même (ajouté par EventLogService), pas de la ligne `Order` en base. */
+  createdAt: z.coerce.date(),
 });
 
 export type OrderCreatedEvent = z.infer<typeof orderCreatedEventSchema>;

@@ -31,4 +31,23 @@ export class AuthService {
 
     return {id: user.id, name: user.name, role: user.role};
   }
+
+  /**
+   * Utilisé pour l'authentification au handshake Socket.IO : le client
+   * fournit un identifiant utilisateur, le serveur va chercher son rôle
+   * réel en base plutôt que de faire confiance à ce que le client prétend.
+   * `null` si l'identifiant ne correspond à aucun compte.
+   */
+  async findById(id: string): Promise<AuthenticatedUser | null> {
+    const user = await this.prisma.user.findUnique({where: {id}});
+    return user ? {id: user.id, name: user.name, role: user.role} : null;
+  }
+
+  /** Annuaire minimal utilisé par le frontend pour afficher les noms des auteurs dans le chat. */
+  listUsers(): Promise<AuthenticatedUser[]> {
+    return this.prisma.user.findMany({
+      select: {id: true, name: true, role: true},
+      orderBy: {name: 'asc'},
+    });
+  }
 }

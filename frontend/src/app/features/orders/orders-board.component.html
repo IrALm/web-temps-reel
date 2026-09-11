@@ -1,0 +1,232 @@
+<div class="page">
+  <header class="topbar">
+    <div class="brand">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v8a2 2 0 0 0 2 2v10"/><path d="M6 2v6M10 2v6"/><path d="M17 2c-1.7 0-3 1.9-3 4.5S15.3 11 17 11v11"/></svg>
+      <span>RestoCommande</span>
+      <span class="role-pill">Vue {{ roleLabel() }}</span>
+    </div>
+
+    <app-mode-selector />
+
+    <div class="user-zone">
+      <div class="user-pill">
+        <div class="name">{{ auth.user()?.name }}</div>
+        <div class="role">{{ roleLabel() }}</div>
+      </div>
+      <button
+        type="button"
+        class="icon-btn"
+        [class.active]="perfOpen()"
+        title="Performance"
+        (click)="perfOpen.set(!perfOpen())"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-6 3 4 5-8"/></svg>
+      </button>
+      <button type="button" class="icon-btn" title="Déconnexion" (click)="logout()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="subheader">
+    <h1>Tableau de commandes</h1>
+    <a routerLink="/chat" class="chat-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Chat d'équipe
+    </a>
+  </div>
+
+  @if (actionError()) {
+    <div class="banner-error">{{ actionError() }}</div>
+  }
+
+  <main class="content">
+    @switch (role()) {
+      @case ('waiter') {
+        <div class="col">
+          <section class="card">
+            <div class="card-title">Nouvelle commande</div>
+
+            <label class="field table-field">
+              <span>Numéro de table</span>
+              <input type="number" placeholder="ex. 7" [(ngModel)]="table" />
+            </label>
+
+            <div class="menu-rows">
+              @for (item of menu(); track item.id) {
+                <div class="menu-row">
+                  <div>
+                    <div class="item-name">{{ item.name }}</div>
+                    <div class="item-price">{{ item.price | number: '1.2-2' }} €</div>
+                  </div>
+                  <div class="stepper">
+                    <button type="button" (click)="decQty(item.id)">−</button>
+                    <div class="qty">{{ qty(item.id) }}</div>
+                    <button type="button" (click)="incQty(item.id)">+</button>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="ex. sans oignon"
+                    [ngModel]="constraintFor(item.id)"
+                    (ngModelChange)="setConstraint(item.id, $event)"
+                  />
+                </div>
+              }
+            </div>
+
+            <button type="button" class="primary" (click)="submitOrder()">
+              Envoyer la commande
+            </button>
+          </section>
+
+          <section>
+            <div class="card-title">Mes commandes en cours</div>
+            <div class="order-list">
+              @for (order of myOrders(); track order.id) {
+                <div class="order-row">
+                  <div class="order-info">
+                    <div class="table-chip">T{{ order.tableNumber }}</div>
+                    <div>
+                      <div class="summary">
+                        @for (it of order.items; track $index) {
+                          {{ it.quantity }}× {{ menuItemName(it.menuItemId) }}@if (it.constraints.length) { ({{ it.constraints.join(', ') }}) }@if (!$last) {, }
+                        }
+                      </div>
+                    </div>
+                  </div>
+                  <div class="status-badge" [style.color]="statusMeta[order.status].color" [style.background]="statusMeta[order.status].bg">
+                    {{ statusMeta[order.status].label }}
+                  </div>
+                </div>
+              } @empty {
+                <p class="empty">Aucune commande pour l'instant.</p>
+              }
+            </div>
+          </section>
+        </div>
+      }
+
+      @case ('cook') {
+        <div class="kanban">
+          <div class="kanban-col">
+            <div class="kanban-title pending">
+              <span class="dot"></span>À préparer
+            </div>
+            @for (order of todo(); track order.id) {
+              <div class="kanban-card pending">
+                <div class="kanban-card-head">
+                  <span>Table {{ order.tableNumber }}</span>
+                </div>
+                <div class="kanban-summary">
+                  @for (it of order.items; track $index) {
+                    {{ it.quantity }}× {{ menuItemName(it.menuItemId) }}@if (!$last) {, }
+                  }
+                </div>
+                <button type="button" class="advance prep" (click)="advance(order, 'in_preparation')">
+                  Commencer →
+                </button>
+              </div>
+            }
+          </div>
+
+          <div class="kanban-col">
+            <div class="kanban-title prep">
+              <span class="dot"></span>En préparation
+            </div>
+            @for (order of inProgress(); track order.id) {
+              <div class="kanban-card prep">
+                <div class="kanban-card-head">
+                  <span>Table {{ order.tableNumber }}</span>
+                </div>
+                <div class="kanban-summary">
+                  @for (it of order.items; track $index) {
+                    {{ it.quantity }}× {{ menuItemName(it.menuItemId) }}@if (!$last) {, }
+                  }
+                </div>
+                <button type="button" class="advance served" (click)="advance(order, 'served')">
+                  Marquer servie →
+                </button>
+              </div>
+            }
+          </div>
+
+          <div class="kanban-col">
+            <div class="kanban-title served">
+              <span class="dot"></span>Servie
+            </div>
+            @for (order of ready(); track order.id) {
+              <div class="kanban-card served">
+                <div class="kanban-card-head">
+                  <span>Table {{ order.tableNumber }}</span>
+                </div>
+                <div class="kanban-summary">
+                  @for (it of order.items; track $index) {
+                    {{ it.quantity }}× {{ menuItemName(it.menuItemId) }}@if (!$last) {, }
+                  }
+                </div>
+                <div class="done">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                  Commande terminée
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      @case ('manager') {
+        <div class="col">
+          <div class="kpis">
+            <div class="kpi">
+              <div class="kpi-label">Commandes en cours</div>
+              <div class="kpi-value prep">{{ countActive() }}</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">Servies</div>
+              <div class="kpi-value served">{{ countServed() }}</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">Annulées</div>
+              <div class="kpi-value cancelled">{{ countCancelled() }}</div>
+            </div>
+          </div>
+
+          <div class="table-card">
+            <div class="table-head">
+              <div>Table</div>
+              <div>Plats</div>
+              <div>Statut</div>
+              <div>Heure</div>
+              <div></div>
+            </div>
+            @for (order of allOrders(); track order.id) {
+              <div class="table-row">
+                <div class="cell-strong">T{{ order.tableNumber }}</div>
+                <div class="cell-summary">
+                  @for (it of order.items; track $index) {
+                    {{ it.quantity }}× {{ menuItemName(it.menuItemId) }}@if (!$last) {, }
+                  }
+                </div>
+                <div>
+                  <span class="status-badge" [style.color]="statusMeta[order.status].color" [style.background]="statusMeta[order.status].bg">
+                    {{ statusMeta[order.status].label }}
+                  </span>
+                </div>
+                <div class="cell-muted">{{ order.createdAt | date: 'HH:mm' }}</div>
+                <div>
+                  @if (order.status !== 'served' && order.status !== 'cancelled') {
+                    <button type="button" class="cancel" (click)="cancel(order)">Annuler</button>
+                  }
+                </div>
+              </div>
+            } @empty {
+              <p class="empty">Aucune commande pour l'instant.</p>
+            }
+          </div>
+        </div>
+      }
+    }
+  </main>
+
+  <app-performance-panel [open]="perfOpen()" (closeRequested)="perfOpen.set(false)" />
+</div>

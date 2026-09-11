@@ -1,0 +1,127 @@
+.page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 24px;
+}
+
+.brand {
+  position: absolute;
+  top: 28px;
+  left: 40px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Lora', serif;
+  font-size: 19px;
+  font-weight: 600;
+}
+
+.card {
+  width: 380px;
+  max-width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px 36px;
+  box-shadow:
+    0 1px 2px oklch(0.3 0.03 40 / 0.06),
+    0 12px 32px oklch(0.3 0.03 40 / 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+h1 {
+  font-family: 'Lora', serif;
+  font-size: 26px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: -10px 0 0;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+input {
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+}
+
+.hint,
+.error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.hint {
+  background: var(--accent-soft);
+  color: var(--text);
+}
+.hint .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--accent);
+  flex: none;
+}
+
+.error {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+button[type='submit'] {
+  height: 46px;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: oklch(0.99 0.005 70);
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+button[type='submit']:hover {
+  background: var(--accent-hover);
+}
+button[type='submit']:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.demo {
+  margin-top: 8px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.demo code {
+  background: var(--surface-alt);
+  padding: 1px 6px;
+  border-radius: 5px;
+}

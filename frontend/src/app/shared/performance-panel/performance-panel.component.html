@@ -1,0 +1,36 @@
+<aside class="panel" [class.open]="open()">
+  <div class="header">
+    <div>
+      <div class="title">Performance</div>
+      <div class="subtitle">{{ monitor.entries().length }} entrées</div>
+    </div>
+    <button type="button" class="close" (click)="close()" aria-label="Fermer le panneau">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+
+  <div class="columns">
+    <div>Heure</div>
+    <div>Stratégie</div>
+    <div>Type</div>
+    <div>Lat.</div>
+    <div>Sta.</div>
+  </div>
+
+  <div class="rows">
+    @for (entry of monitor.entries(); track entry.id) {
+      <div class="row" [class.error]="entry.kind === 'error'">
+        <div class="muted">{{ formatTime(entry.timestamp) }}</div>
+        <div class="strategy">
+          <span class="dot" [attr.data-strategy]="entry.strategy"></span>
+          {{ strategyLabel(entry.strategy) }}
+        </div>
+        <div class="muted label">{{ entry.label }}</div>
+        <div>{{ entry.latencyMs !== null ? entry.latencyMs + ' ms' : '—' }}</div>
+        <div class="status" [class.ok]="entry.kind !== 'error'">{{ entry.status }}</div>
+      </div>
+    } @empty {
+      <div class="empty">Aucune activité pour l'instant — changez de mode ou créez une commande.</div>
+    }
+  </div>
+</aside>

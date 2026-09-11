@@ -1,0 +1,184 @@
+.page {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 32px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  font-family: 'Lora', serif;
+  font-size: 19px;
+  font-weight: 600;
+}
+
+.role-pill {
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Public Sans', sans-serif;
+}
+
+.back-link {
+  font-family: 'Public Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+.back-link:hover {
+  color: var(--accent);
+}
+
+.spacer {
+  flex: 1;
+}
+
+.user-pill .name {
+  font-family: 'Public Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.channels {
+  flex: none;
+  width: 260px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 18px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.channels-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0 10px 10px;
+}
+
+.channel {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 10px;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  font-size: 13px;
+}
+.channel.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.thread {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.thread-title {
+  flex: none;
+  padding: 16px 28px;
+  border-bottom: 1px solid var(--border);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+}
+.message.mine {
+  align-items: flex-end;
+}
+
+.meta {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  padding: 0 4px;
+}
+
+.bubble {
+  max-width: 420px;
+  padding: 11px 15px;
+  border-radius: 14px;
+  background: var(--surface-alt);
+  color: var(--text);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+.message.mine .bubble {
+  background: var(--accent);
+  color: oklch(0.99 0.005 70);
+}
+
+.empty {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.composer {
+  flex: none;
+  display: flex;
+  gap: 10px;
+  padding: 16px 28px;
+  border-top: 1px solid var(--border);
+}
+
+.composer input {
+  flex: 1;
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 22px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  font-size: 13.5px;
+  color: var(--text);
+}
+
+.composer button {
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 999px;
+  background: var(--accent);
+  color: oklch(0.99 0.005 70);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}

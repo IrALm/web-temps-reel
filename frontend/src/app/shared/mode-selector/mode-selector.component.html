@@ -1,0 +1,12 @@
+<div class="segmented">
+  @for (m of modes; track m.value) {
+    <button
+      type="button"
+      class="option"
+      [class.active]="realtime.mode() === m.value"
+      (click)="select(m.value)"
+    >
+      {{ m.label }}
+    </button>
+  }
+</div>

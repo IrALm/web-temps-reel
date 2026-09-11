@@ -4,11 +4,11 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import type {Order, OrderStatus} from '@resto/shared';
+import type {CreateOrder, OrderStatus} from '@resto/shared';
 import {EventLogService} from '../events/event-log.service.js';
 import {PrismaService} from '../prisma/prisma.service.js';
 
-export type CreateOrderInput = Omit<Order, 'status'>;
+export type CreateOrderInput = CreateOrder;
 
 /**
  * Transitions valides pour le cycle de vie simplifié d'une commande :

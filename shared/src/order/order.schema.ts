@@ -26,7 +26,16 @@ export const orderSchema = z.object({
   status: orderStatusSchema,
 });
 
+export const createOrderSchema = orderSchema.omit({status: true});
+
+export const updateOrderStatusSchema = z.object({
+  expectedStatus: orderStatusSchema,
+  requestedStatus: orderStatusSchema,
+});
+
 export type Order = z.infer<typeof orderSchema>;
 export type OrderItem = z.infer<typeof orderItemSchema>;
 export type OrderStatus = z.infer<typeof orderStatusSchema>;
 export type MenuItem = z.infer<typeof menuItemSchema>;
+export type CreateOrder = z.infer<typeof createOrderSchema>;
+export type UpdateOrderStatus = z.infer<typeof updateOrderStatusSchema>;

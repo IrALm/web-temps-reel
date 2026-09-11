@@ -1,0 +1,41 @@
+<div class="page">
+  <div class="brand">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v8a2 2 0 0 0 2 2v10"/><path d="M6 2v6M10 2v6"/><path d="M17 2c-1.7 0-3 1.9-3 4.5S15.3 11 17 11v11"/></svg>
+    <span>RestoCommande</span>
+  </div>
+
+  <form class="card" (ngSubmit)="submit()">
+    <h1>Connexion</h1>
+    <p class="subtitle">Accédez au tableau de commandes de votre service.</p>
+
+    <label>
+      <span>Nom</span>
+      <input type="text" name="name" placeholder="ex. Bob Waiter" [(ngModel)]="name" autocomplete="username" />
+    </label>
+
+    <label>
+      <span>Mot de passe</span>
+      <input type="password" name="password" placeholder="••••••••" [(ngModel)]="password" autocomplete="current-password" />
+    </label>
+
+    @if (roleHint) {
+      <div class="hint">
+        <span class="dot"></span>
+        Rôle détecté : <strong>{{ roleHint }}</strong>
+      </div>
+    }
+
+    @if (error()) {
+      <div class="error">{{ error() }}</div>
+    }
+
+    <button type="submit" [disabled]="loading()">
+      {{ loading() ? 'Connexion…' : 'Se connecter' }}
+    </button>
+
+    <div class="demo">
+      Comptes de démonstration&nbsp;: <strong>Alice Manager</strong> · <strong>Bob Waiter</strong> · <strong>Chloe Cook</strong>
+      <br />Mot de passe&nbsp;: <code>password123</code>
+    </div>
+  </form>
+</div>

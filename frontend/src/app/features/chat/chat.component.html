@@ -1,0 +1,56 @@
+<div class="page">
+  <header class="topbar">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v8a2 2 0 0 0 2 2v10"/><path d="M6 2v6M10 2v6"/><path d="M17 2c-1.7 0-3 1.9-3 4.5S15.3 11 17 11v11"/></svg>
+    <span>RestoCommande</span>
+    <span class="role-pill">Chat d'équipe</span>
+    <a routerLink="/orders" class="back-link">← Tableau de commandes</a>
+    <div class="spacer"></div>
+    <div class="user-pill">
+      <div class="name">{{ auth.user()?.name }}</div>
+    </div>
+  </header>
+
+  <div class="body">
+    <nav class="channels">
+      <div class="channels-title">Canaux</div>
+      @for (c of channels(); track c.id) {
+        <button
+          type="button"
+          class="channel"
+          [class.active]="activeChannel() === c.id"
+          (click)="select(c.id)"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          {{ c.name }}
+        </button>
+      }
+    </nav>
+
+    <section class="thread">
+      <div class="thread-title">{{ channelName(activeChannel()) }}</div>
+
+      <div class="messages">
+        @for (m of chat.messages(); track m.id) {
+          <div class="message" [class.mine]="isMine(m.authorId)">
+            <div class="meta">{{ authorName(m.authorId) }} · {{ m.createdAt | date: 'HH:mm' }}</div>
+            <div class="bubble">{{ m.content }}</div>
+          </div>
+        } @empty {
+          <p class="empty">Aucun message pour l'instant.</p>
+        }
+      </div>
+
+      <div class="composer">
+        <input
+          type="text"
+          placeholder="Écrire un message…"
+          [(ngModel)]="draft"
+          (keyup.enter)="send()"
+        />
+        <button type="button" (click)="send()" aria-label="Envoyer">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg>
+        </button>
+      </div>
+    </section>
+  </div>
+</div>
