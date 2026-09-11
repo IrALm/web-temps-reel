@@ -1,6 +1,9 @@
-# RestoCommande — Dossier technique
+# RestoCommande Dossier technique
 
 **Présenté par : Moise AGANZE LWABOSHI** 
+
+---
+
 **Objectif du projet :** Illustre les 5 mécanismes de communication temps réel (Polling, Long polling, SSE, WebSocket natif, Socket.IO), implémentés côte à côte et sélectionnables en direct depuis l'interface.
 
 ---
